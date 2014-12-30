@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+    <class name="com.ruchi.hibernate.model.DAO.SentenceDao" table="sentence">
+        <id name="review_id" type="java.lang.String">
+            <column name="review_id" />
+            <!--<generator class="increment" />-->
+        </id>
+        <property name="sentence_location" type="int">
+            <column name="sentence_location" />
+        </property>
+        <property name="food_id" type="java.lang.String">
+            <column name="food_id" />
+        </property>
+        <property name="sentiment_value" type="float">
+            <column name="sentiment_value" />
+        </property>
+    </class>
+</hibernate-mapping>
