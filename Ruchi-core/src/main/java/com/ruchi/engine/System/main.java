@@ -16,7 +16,6 @@ public class main {
     {
         DatabaseConnector db=new DatabaseConnector();
         LanguageDetector ld=new LanguageDetector();
-        //WordAdder wd=new WordAdder();
 
         db.connect();
         ld.load_profile();
@@ -48,9 +47,10 @@ public class main {
                     ArrayList<String> sentences=sent.getSentence(s1);
                     for(String s2:sentences)
                     {
-                        String sen=s2.replace("."," ").replace(",","").replace("!","").replace("  "," ");
+                        String sen=LanguageDetector.remove_symbols(s2);
                         try {
-                            sent.POSTag(sen);
+                            if(sen.length()>1)
+                            sent.tagSentence(sen);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }

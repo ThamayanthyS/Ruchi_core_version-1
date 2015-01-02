@@ -1,53 +1,39 @@
 package com.ruchi.engine.foodextraction;
 
-import com.ruchi.engine.database.DatabaseConnector;
-import com.ruchi.engine.preprocessing.Stemming;
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import opennlp.tools.namefind.NameFinderME;
-import opennlp.tools.namefind.NameSampleDataStream;
-import opennlp.tools.namefind.TokenNameFinderModel;
-import opennlp.tools.util.ObjectStream;
-import opennlp.tools.util.PlainTextByLineStream;
 import opennlp.tools.util.Span;
 
-import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
+import com.ruchi.engine.database.DatabaseConnector;
 
 
 /**
- * Created by Brus panda on 12/2/2014.
+ * Created by Brusoth on 12/2/2014.
  */
 public class Extraction {
-    DatabaseConnector db=new DatabaseConnector();
-    OpenNLP sent;
-
-    NameFinderME nfm;
+    private DatabaseConnector db=new DatabaseConnector();
+    private OpenNLP sent;
 
     ArrayList<String> food_list=new ArrayList<String>();
     ArrayList<String> rest_list=new ArrayList<String>();
 
-    public void load(){
+    public void load(OpenNLP sent){
         db.connect();
         db.getFoodNames(food_list);
         rest_list=db.getRestaurants();
-        train();
-        sent=new OpenNLP();
-        sent.loadModel();
+        this.sent=sent;
     }
 
+    //unused method only for testing purpose
     public void readReviews()
     {
-        System.out.print(rest_list.size());
         for(String rest:rest_list){
-
-
             ArrayList<String> review_set=db.getRestaurantReviews(rest.trim());
-            ArrayList<word> word_list=new ArrayList<word>();
-
             for(String review:review_set)
             {
                 ArrayList<String> sentences=sent.getSentence(review);
-                int sent_num=1;
                 for(String sentence:sentences){
                     String[] tokens=predict(sentence.trim());
                     String[] toks=sent.getWordTokens(sentence);
@@ -64,70 +50,25 @@ public class Extraction {
                             }
                         }
                     }
-
-                    sent_num++;
                 }
-                analyse(word_list );
             }
-
-        }
-
-
-    }
-
-    public void train(){
-        try {
-            FileReader fileReader = new FileReader("res/review_train");
-            ObjectStream fileStream = new PlainTextByLineStream(fileReader);
-            ObjectStream sampleStream = new NameSampleDataStream(fileStream);
-            TokenNameFinderModel model = NameFinderME.train("pt-br", "train", sampleStream, Collections.<String, Object>emptyMap());
-            nfm = new NameFinderME(model);
-        }
-        catch (Exception e){
-            System.out.println(e);
         }
     }
 
     public String[] predict(String line){
         String[] tokens=sent.getTokens(line);
-        Span nameSpans[] = nfm.find(tokens);
+        Span nameSpans[] = sent.getNames(tokens);
         String[] array=Span.spansToStrings(nameSpans,tokens);
         return array;
     }
 
-    public void analyse(ArrayList<word> word_list)
-    {
-        for(word w:word_list){
-            //System.out.println(w.getWord());
-            if(food_list.contains(Stemming.removeStopWordsAndStem(w.getWord())))
-            {
-
-            }
-        }
-    }
-
-
     public static void main(String args[]){
         Extraction exe=new Extraction();
-        exe.load();
+        OpenNLP nlp=new OpenNLP();
+        nlp.loadModel();
+        exe.load(nlp);
+        String[] output=exe.predict("i had a pizza");
+        System.out.println(output[0]);
         exe.readReviews();
-    }
-}
-
-class word{
-    private String word;
-    private int sent_number;
-
-    word(String word,int number){
-        this.word=word;
-        sent_number=number;
-    }
-
-    public String getWord(){
-        return word;
-    }
-
-    public int getNumber(){
-        return sent_number;
     }
 }

@@ -11,31 +11,17 @@ import java.util.ArrayList;
  * Created by brusoth on 11/7/2014.
  */
 public class LanguageDetector {
-
-    private int total_reviews=0;
-    private int passed_reviews=0;
-
-    public void process(ArrayList<String> list)
-    {
-        load_profile();
-        for(String s:list)
-        {
-            check_Language(remove_symbols(s));
-        }
-        System.out.println(passed_reviews/total_reviews);
-    }
-
-    public String remove_symbols(String review)
-    {
-        return review.replace("..","").replace("??","");
-    }
-
+	
+	private Detector detector;
+ 
     public void load_profile()
     {
+    	//path to profile directory
         String path=System.getProperty("user.dir")+"/profiles";
-        System.out.println(path);
+        
         try {
-            DetectorFactory.loadProfile(path);
+            DetectorFactory.loadProfile(path);						//load directory
+            detector = DetectorFactory.create();
         } catch (LangDetectException e) {
             e.printStackTrace();
         }
@@ -44,22 +30,32 @@ public class LanguageDetector {
     public boolean check_Language(String review)
     {
         try {
-            Detector detector = DetectorFactory.create();
             detector.append(review);
             ArrayList<Language> langlist = detector.getProbabilities();
             for(Language lan:langlist)
             {
+            	//if probability for English is more than 0.8 then return true
                 if(lan.lang.equalsIgnoreCase("en") && lan.prob>0.8)
                 {
-                    passed_reviews++;
                     return true;
                 }
             }
-            total_reviews++;
 
         } catch (LangDetectException e) {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static String remove_symbols(String review)
+    {
+    	/*RULES
+    	 * Remove contents inside braces
+    	 * Remove everything other than number,character,apostrophe,comma,hyphen
+    	 * Reduce multiple spaces into single space
+    	 * Replace hyphen into space
+    	 */
+        review=review.replaceAll("\\(.*\\)", "").replaceAll("[^a-zA-Z0-9', -]", "").replaceAll("\\s+"," ").replaceAll("-"," ");
+        return review;
     }
 }

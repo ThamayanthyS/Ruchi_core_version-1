@@ -1,7 +1,7 @@
 package com.ruchi.engine.utils;
 
 import com.ruchi.engine.database.DatabaseConnector;
-import com.ruchi.engine.preprocessing.Stemming;
+import com.ruchi.engine.preprocessing.Stemmer;
 
 import java.io.*;
 
@@ -11,7 +11,7 @@ import java.io.*;
 public class FoodRemover {
     public static void main(String args[])
     {
-        new FoodRemover().add_food();
+        new FoodRemover().remove();
     }
     public void remove()
     {
@@ -26,7 +26,7 @@ public class FoodRemover {
             //Read File Line By Line
             db.connect();
             while ((strLine = br.readLine()) != null)   {
-                db.removeFoodItem(Stemming.removeStopWordsAndStem(strLine.trim()));
+                db.removeFoodItem(Stemmer.pluralToSingular(strLine.trim()));
             }
             db.disconect();
 

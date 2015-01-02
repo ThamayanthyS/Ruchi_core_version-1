@@ -8,7 +8,7 @@ import java.util.ArrayList;
  */
 public class DatabaseConnector {
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://localhost/synergy_training_sample";
+    static String DB_URL = "jdbc:mysql://localhost/synergy_training_sample";
 
     static final String USER = "root";
     static final String PASS = "";
@@ -16,6 +16,16 @@ public class DatabaseConnector {
     Connection conn = null;
     Statement stmt = null;
     PreparedStatement pstmt = null;
+    
+    public DatabaseConnector(){
+    	
+    }
+    
+    public DatabaseConnector(boolean isTest){
+    	if(isTest==true){
+    		DB_URL = "jdbc:mysql://localhost/synergy_test_data";
+    	}
+    }
 
     public void connect()
     {
@@ -33,7 +43,6 @@ public class DatabaseConnector {
     {
         try {
             conn.close();
-//            pstmt.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -51,7 +60,6 @@ public class DatabaseConnector {
             ResultSet res = pstmt.executeQuery();
             while(res.next()){
                 String review = res.getString("review");
-                //System.out.println(review);
                 list.add(review);
             }
 
@@ -83,13 +91,13 @@ public class DatabaseConnector {
 
     public void removeFoodItem(String food)
     {
-        String query="DELETE FROM food_names WHERE food_name = ?";
+        String query="DELETE FROM foods WHERE food_name = ?";
 
         try {
             pstmt = conn.prepareStatement(query) ;
             pstmt.setString(1,food);
             int value=pstmt.executeUpdate();
-            //System.out.println(value);
+            System.out.println(value);
 
         } catch (SQLException e) {
             e.printStackTrace();
@@ -120,7 +128,7 @@ public class DatabaseConnector {
 
     public void insertFoodItem(String food)
     {
-        String query="INSERT INTO food_name_list_all VALUES (?,?)";
+        String query="INSERT INTO foods VALUES (?,?)";
 
         try {
             pstmt = conn.prepareStatement(query) ;
@@ -142,7 +150,7 @@ public class DatabaseConnector {
             pstmt.setString(1,food);
             pstmt.setString(2,"");
             int value=pstmt.executeUpdate();
-            System.out.println(value);
+            //System.out.println(value);
 
         } catch (SQLException e) {
             e.printStackTrace();
